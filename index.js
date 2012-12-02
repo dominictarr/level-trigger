@@ -25,6 +25,7 @@ module.exports = function (db) {
 
       range.name = range.name || uuid()
       ranges[range.name] = range
+      range.map = range.map || function (e) { return e }
       db.queue.add('queue:'+range.name, job)
     }
   }
@@ -40,7 +41,7 @@ module.exports = function (db) {
     iterate.join(batch, ranges, function (item, range, _, name) {
       var key = ''+item.key
       if(between(key, range))
-        insert.push(db.queue(job.name, key, false))
+        insert.push(db.queue(job.name, job.map(key), false))
     })
     return batch.concat(insert)
   })
