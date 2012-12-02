@@ -7,9 +7,15 @@
     "url": "git://github.com/dominictarr/level-trigger.git"
   },
   "dependencies": {
-    "iterate": "~0.1.0"
+    "iterate": "~0.1.0",
+    "level-hooks": "~1.1.1",
+    "level-queue": "0.0.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "levelup": "~0.3.2",
+    "rimraf": "~2.0.2",
+    "macgyver": "~1.9.2"
+  },
   "scripts": {
     "test": "set -e; for t in test/*.js; do node $t; done"
   },

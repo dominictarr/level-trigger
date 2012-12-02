@@ -1,7 +1,7 @@
 
 var levelup = require('levelup')
 var rimraf  = require('rimraf')
-
+var mac     = require('macgyver')().autoValidate()
 var trigger = require('..')
 
 var path = '/tmp/level-trigger-test'
@@ -38,6 +38,8 @@ rimraf(path, function () {
         console.log('thing', reduced)
 
         db.put('~trigger:reduced', JSON.stringify(reduced), done)
+
+        db.emit('test:reduce', reduced)
       }
 
     })
@@ -52,5 +54,7 @@ rimraf(path, function () {
       db.put('hello-D', JSON.stringify({thing: 6}))
       db.del('hello-C')
     })
+
+    db.on('test:reduce', mac().times(5))
   })
 })
