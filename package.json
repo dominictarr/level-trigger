@@ -9,7 +9,8 @@
   "dependencies": {
     "iterate": "~0.1.0",
     "level-hooks": "~1.1.1",
-    "level-queue": "0.0.4"
+    "level-queue": "0.0.4",
+    "node-uuid": "~1.4.0"
   },
   "devDependencies": {
     "levelup": "~0.3.2",
