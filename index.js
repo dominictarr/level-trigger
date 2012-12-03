@@ -22,10 +22,12 @@ module.exports = function (db) {
       if(!job) job = range.job
       else     range.job = job
 
-      range.name = range.name || uuid()
-      range.start = ''
-      range.end = '~'
+      range.name  = range.name  || uuid()
+      range.start = range.start || ''
+      range.end   = range.end   ||'~'
+
       ranges[range.name] = range
+
       range.map = range.map || function (e) { return e.key }
       db.queue.add('trigger:'+range.name, job)
     }
@@ -41,7 +43,6 @@ module.exports = function (db) {
     iterate.join(batch, ranges, function (item, range, _, name) {
       var key = ''+item.key, mapped
       if(between(key, range) && (mapped = range.map(item))) {
-
         insert.push(db.queue('trigger:' + range.name, mapped, false))
       }
     })
