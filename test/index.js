@@ -18,6 +18,10 @@ rimraf(path, function () {
       name: 'test',
 
       map: function (item) {
+        console.log('MAP', JSON.stringify({
+          key: ''+item.key, 
+          type: item.type
+        }))
         var obj = item.value ? JSON.parse(item.value) : null
         return JSON.stringify({
           key: ''+item.key, 
@@ -48,6 +52,7 @@ rimraf(path, function () {
     //then it will read puts from these twice.
     //TODO: add snapshot option for leveldb.
     db.once('queue:drain', function () {
+      console.log('QUEUE')
       db.put('hello-A', JSON.stringify({thing: 1}))
       db.put('hello-B', JSON.stringify({thing: 2}))
       db.put('hello-C', JSON.stringify({thing: 3}))
