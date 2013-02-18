@@ -22,9 +22,12 @@ module.exports = function (db) {
       if(!job) job = range.job
       else     range.job = job
 
-      range.name  = range.name  || uuid()
+      if(!range.name)
+        throw new Error('expects trigger to have name')
+
+      //TODO allow range to be string.
       range.start = range.start || ''
-      range.end   = range.end   ||'~'
+      range.end   = range.end   || '~'
 
       ranges[range.name] = range
 
