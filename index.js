@@ -1,55 +1,65 @@
+var shasum = require('shasum')
 
-var queue   = require('level-queue')
-var hooks   = require('level-hooks')
-var uuid    = require('node-uuid')
-var iterate = require('iterate')
+//if a job starts, and another is queued before the current job ends,
+//delay it, so that the job is only triggered once.
 
-function between(key, range) {
-  return (
-    (!range.start || range.start <= key) &&
-    (!range.end || key <= range.end)
-  )
-}
+module.exports = function (input, jobs, map, work) {
+  if(!work) work = map, map = function (data) { return data.key }
+  //create a subsection for the jobs,
+  //if you don't pass in a separate db,
+  //create a section inside the input
+  var pending = {}, running = {}
 
-module.exports = function (db) {
+  if('string' === typeof jobs)
+    jobs = input.sublevel(jobs)
 
-  if(db.trigger) return db
+  var retry = []
 
-  var ranges = {}
+  function doJob (data) {
+    //don't process deletes!
+    if(!data.value) return
+    var hash = shasum(data.value)
 
-  db.trigger = {
-    add: function (range, job) {
-      if(!job) job = range.job
-      else     range.job = job
+    if(!running[hash])
+      running[hash] = true
+    else return
 
-      if(!range.name)
-        throw new Error('expects trigger to have name')
+    var done = false
 
-      //TODO allow range to be string.
-      range.start = range.start || ''
-      range.end   = range.end   || '~'
-
-      ranges[range.name] = range
-
-      range.map = range.map || function (e) { return e.key }
-      db.queue.add('trigger:'+range.name, job)
-    }
+    work(data.value, function (err) {
+      if(done) return
+      done = true
+      if(err) {
+        running[hash]
+        return setTimeout(function () {
+          doJob(data)
+        }, 500)
+      }
+      
+      jobs.del(data.key, function (err) {
+        if(err) return retry.push(data)
+        delete running[hash]
+        if(pending[hash]) {
+          delete pending[hash]
+          doJob(data)
+        }
+      })
+    })
   }
 
-  queue()(db)
-  hooks()(db)
-
-  db.hooks.pre(function (batch) {
-    var insert = []
-    //for each operation inside each range,
-    //atomically add a record, or run a the job.
-    iterate.join(batch, ranges, function (item, range, _, name) {
-      var key = ''+item.key, mapped
-      if(between(key, range) && (mapped = range.map(item))) {
-        insert.push(db.queue('trigger:' + range.name, mapped, false))
-      }
-    })
-
-    return batch.concat(insert)
+  input.pre(function (ch, add) {
+    var key = map(ch)
+    var hash = shasum(key)
+    console.log('KEY', key)
+    if(!pending[hash])
+      add({key: Date.now(), value: key, type: 'put'}, jobs)
+    else
+      pending[hash] = (0 || pending[hash]) + 1
   })
+
+  jobs.createReadStream().on('data', doJob)
+  jobs.post(doJob)
+
+  return jobs
 }
+
