@@ -2,24 +2,22 @@
 var levelup = require('levelup')
 var rimraf  = require('rimraf')
 var mac     = require('macgyver')().autoValidate()
-var trigger = require('..')
+var Trigger = require('..')
+var SubLevel = require('level-sublevel')
 
 var path = '/tmp/level-trigger-test'
 
 rimraf(path, function () {
   levelup(path, {createIfMissing: true}, function (err, db) {
 
-    trigger(db)
-    
-    var reduced = null
+  SubLevel(db)
+  var reduceDb = db.sublevel('reduce')
+  var reduced
 
-    db.trigger.add({
-
-      name: 'test',
-
-      map: function (item) {
+  var trigDb = Trigger(db, 'test-trigger', function (item) {
+        //map
         console.log('MAP', JSON.stringify({
-          key: ''+item.key, 
+          key: ''+item.key,
           type: item.type
         }))
         var obj = item.value ? JSON.parse(item.value) : null
@@ -28,8 +26,7 @@ rimraf(path, function () {
           type: item.type
         })
       },
-
-      job: function (value, done) {
+      function (value, done) {
         value = JSON.parse(value)
         
         function reduce (acc, n, put) {
@@ -39,26 +36,22 @@ rimraf(path, function () {
         var put = value.type == 'put'
 
         reduced = reduce(reduced, value, put)
-        console.log('thing', reduced)
-
-        db.put('~trigger:reduced', JSON.stringify(reduced), done)
-
+        console.log('reduced', reduced)
+        reduceDb.put('reduced', JSON.stringify(reduced), done)
         db.emit('test:reduce', reduced)
-      }
-
-    })
+      })
 
     //if we don't wait for the queue to drain,
     //then it will read puts from these twice.
     //TODO: add snapshot option for leveldb.
-    db.once('queue:drain', function () {
-      console.log('QUEUE')
+//    db.once('queue:drain', function () {
+    //  console.log('QUEUE')
       db.put('hello-A', JSON.stringify({thing: 1}))
       db.put('hello-B', JSON.stringify({thing: 2}))
       db.put('hello-C', JSON.stringify({thing: 3}))
       db.put('hello-D', JSON.stringify({thing: 6}))
       db.del('hello-C')
-    })
+  //  })
 
     db.on('test:reduce', mac().times(5))
   })
