@@ -50,7 +50,6 @@ module.exports = function (input, jobs, map, work) {
   input.pre(function (ch, add) {
     var key = map(ch)
     var hash = shasum(key)
-    console.log('KEY', key)
     if(!pending[hash])
       add({key: Date.now(), value: key, type: 'put'}, jobs)
     else
