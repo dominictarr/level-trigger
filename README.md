@@ -11,23 +11,29 @@ it will be rerun the next time it's started, for consistency!
 # Example
 
 ``` js
-var trigger = require('level-trigger')
-trigger(db)
+var db       = require('levelup')('/tmp/level-trigger-example')
+var SubLevel = require('level-sublevel'); SubLevel(db) //MUST install sublevel.
+var Trigger  = require('level-trigger')
 
-db.trigger.add({
-  name: 'example',
-  start: 'A', end: '~',
-  mapKey: function (key) {
+var trigDb = Trigger(db, 'example', function (ch) {
     //optionally index the job with a different key.
     //if there are two jobs with the same key,
     //it will only be triggered once.
-    return key
+    return ch.key
   },
-  job: function (value, done) { 
+  function (value, done) { 
     //call done when job is done.
     done()
   }
 })
+
+//if you want, start the trigger in batch mode.
+//this will process all the keys in the input db.
+
+//otherwise, jobs will be processed whenever a key is inserted!
+
+if(require('optimist').argv.batch)
+  trigDb.start()
 
 ```
 
