@@ -47,14 +47,25 @@ module.exports = function (input, jobs, map, work) {
     })
   }
 
-  input.pre(function (ch, add) {
+  function doHook (ch, add) {
     var key = map(ch)
     var hash = shasum(key)
     if(!pending[hash])
       add({key: Date.now(), value: key, type: 'put'}, jobs)
     else
       pending[hash] = (0 || pending[hash]) + 1
-  })
+  }
+
+  input.pre(doHook)
+
+  //process the whole db as a batch
+  jobs.start = function () {
+    input.createReadStream()
+      .on('data', function (data) {
+        doHook(data, doJob)
+      })
+    return jobs
+  }
 
   jobs.createReadStream().on('data', doJob)
   jobs.post(doJob)
