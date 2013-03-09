@@ -8,6 +8,10 @@ Jobs must be idempotent!
 If the process crashes before job has calledback,
 it will be rerun the next time it's started, for consistency!
 
+## Stability
+
+Unstable: Expect patches and features, possible api changes.
+
 # Example
 
 ``` js
