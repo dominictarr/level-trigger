@@ -7,13 +7,14 @@
     "url": "git://github.com/dominictarr/level-trigger.git"
   },
   "dependencies": {
-    "shasum": "0.0.2"
+    "shasum": "0.0.2",
+    "monotonic-timestamp": "0.0.8"
   },
   "devDependencies": {
     "macgyver": "~1.10.1",
     "rimraf": "~2.0.2",
-    "level-sublevel": "~3.1",
-    "levelup": "~0.6",
+    "level-sublevel": "~4.6.4",
+    "levelup": "~0.8",
     "tape": "~0.2.2"
   },
   "scripts": {
