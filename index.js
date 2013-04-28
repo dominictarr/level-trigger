@@ -1,5 +1,5 @@
 var shasum = require('shasum')
-
+var timestamp = require('monotonic-timestamp')
 //if a job starts, and another is queued before the current job ends,
 //delay it, so that the job is only triggered once.
 
@@ -33,7 +33,8 @@ module.exports = function (input, jobs, map, work) {
         running[hash]
         return setTimeout(function () {
           doJob(data)
-        }, 500)
+        //hardcoded timeout WTF
+        }, 50)
       }
       
       jobs.del(data.key, function (err) {
@@ -50,8 +51,9 @@ module.exports = function (input, jobs, map, work) {
   function doHook (ch, add) {
     var key = map(ch)
     var hash = shasum(key)
+
     if(!pending[hash])
-      add({key: Date.now(), value: key, type: 'put'}, jobs)
+      add({key: timestamp(), value: key, type: 'put', prefix: jobs})
     else
       pending[hash] = (0 || pending[hash]) + 1
   }
