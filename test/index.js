@@ -12,7 +12,7 @@ rimraf(path, function () {
 
   SubLevel(db)
   var reduceDb = db.sublevel('reduce')
-  var reduced
+  var reduced = 0
 
   var trigDb = Trigger(db, 'test-trigger', function (item) {
         //map
@@ -35,8 +35,8 @@ rimraf(path, function () {
 
         var put = value.type == 'put'
 
+        console.log('reduced', reduced, value)
         reduced = reduce(reduced, value, put)
-        console.log('reduced', reduced)
         reduceDb.put('reduced', JSON.stringify(reduced), done)
         db.emit('test:reduce', reduced)
       })
@@ -44,14 +44,12 @@ rimraf(path, function () {
     //if we don't wait for the queue to drain,
     //then it will read puts from these twice.
     //TODO: add snapshot option for leveldb.
-//    db.once('queue:drain', function () {
-    //  console.log('QUEUE')
-      db.put('hello-A', JSON.stringify({thing: 1}))
-      db.put('hello-B', JSON.stringify({thing: 2}))
-      db.put('hello-C', JSON.stringify({thing: 3}))
-      db.put('hello-D', JSON.stringify({thing: 6}))
-      db.del('hello-C')
-  //  })
+
+    db.put('hello-A', JSON.stringify({thing: 1}))
+    db.put('hello-B', JSON.stringify({thing: 2}))
+    db.put('hello-C', JSON.stringify({thing: 3}))
+    db.put('hello-D', JSON.stringify({thing: 6}))
+    db.del('hello-C')
 
     db.on('test:reduce', mac().times(5))
   })
