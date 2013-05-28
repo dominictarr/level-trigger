@@ -1,11 +1,13 @@
-var dir = '/tmp/level-trigger-test'
-require('rimraf').sync(dir)
+var dir = 'level-trigger-test'
+var level = require('level-test')()
+var sublevel = require('level-sublevel')
+
 var Trigger = require('../')
 var test    = require('tape')
 
 test('start a trigger manually', function (t) {
 
-  var db = require('level-sublevel')(require('levelup')(dir))
+  var db = sublevel(level(dir))
   var sum = 0, _sum = 0
 
   db.batch('abcdef'.split('').map(function (e) {
