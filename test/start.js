@@ -18,12 +18,12 @@ test('start a trigger manually', function (t) {
     var seq = Trigger(db, 'seq', function (key, done) {
       db.get(key, function (err, val) {
         if(err) return done(err)
-        console.log('SEQ', key, val)
         _sum += Number(val)
-        if(_sum === sum)
-          t.end()
-        console.log(sum, _sum)
-        seq.put(key, val, done)
+        t.ok(_sum <= sum, 'lte to correct total')
+        if(_sum === sum) {
+          t.ok(_sum == sum, 'correct total')
+          return t.end()
+        }
       })
     }).start()
   })
