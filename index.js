@@ -50,6 +50,7 @@ module.exports = function (input, jobs, map, work) {
 
   function doHook (ch, add) {
     var key = map(ch)
+    if(key == null) return
     var hash = shasum(key)
 
     if(!pending[hash])
