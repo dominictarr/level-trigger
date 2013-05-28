@@ -14,7 +14,7 @@
     "macgyver": "~1.10.1",
     "rimraf": "~2.0.2",
     "level-sublevel": "~4.6.4",
-    "tape": "~0.2.2",
+    "tape": "~1.0.2",
     "level-test": "~1.1.1"
   },
   "scripts": {
