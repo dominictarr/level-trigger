@@ -5,7 +5,7 @@ var Trigger = require('../')
 
 tape('retrigger', function (t) {
 
-  t.plan(2)
+  t.plan(1)
 
   var db = sublevel(level('retrigger'))
   var totalDb = db.sublevel('total')
@@ -38,9 +38,12 @@ tape('retrigger', function (t) {
     })
   })
 
+  var fin = false
+
   db.on('total', function (val) {
     console.log('total ==', val, val == 9)
-    if(val == 9) {
+    if(val == 9 && !fin) {
+      fin = true
       t.ok(true)
       t.end()
     }
