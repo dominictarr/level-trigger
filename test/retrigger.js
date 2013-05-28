@@ -5,6 +5,8 @@ var Trigger = require('../')
 
 tape('retrigger', function (t) {
 
+  t.plan(1)
+
   var db = sublevel(level('retrigger'))
   var totalDb = db.sublevel('total')
 
@@ -16,14 +18,11 @@ tape('retrigger', function (t) {
       setTimeout(function () {
         var total = 0
         db.createReadStream()
-          .on('data', function (data) {
-             
+          .on('data', function (data) {             
             total += +data.value
           })
           .on('end', function () {
-            console.log('total', total)
             totalDb.put('total', total, function (err) {
-              console.log('total=', total)
               db.emit('total', total)
               done(err)
             })
@@ -41,8 +40,10 @@ tape('retrigger', function (t) {
 
   db.on('total', function (val) {
     console.log('total', val)
-    if(val == 9)
+    if(val == 9) {
+      t.ok()
       t.end()
+    }
   })
 
 })
