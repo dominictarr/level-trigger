@@ -53,10 +53,10 @@ module.exports = function (input, jobs, map, work) {
     if(key == null) return
     var hash = shasum(key)
 
-    if(!pending[hash])
+    if(!running[hash])
       add({key: timestamp(), value: key, type: 'put', prefix: jobs})
     else
-      pending[hash] = (0 || pending[hash]) + 1
+      pending[hash] = true
   }
 
   input.pre(doHook)
