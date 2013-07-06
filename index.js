@@ -30,7 +30,6 @@ module.exports = function (input, jobs, map, work) {
       if(done) return
       done = true
       if(err) {
-        running[hash]
         return setTimeout(function () {
           doJob(data)
         //hardcoded timeout WTF
