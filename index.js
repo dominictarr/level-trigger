@@ -8,10 +8,32 @@ module.exports = function (input, jobs, map, work) {
   //create a subsection for the jobs,
   //if you don't pass in a separate db,
   //create a section inside the input
-  var pending = {}, running = {}
+  var pending = {}, running = {}, runningCount = 0, pendingCount = 0
+
 
   if('string' === typeof jobs)
     jobs = input.sublevel(jobs)
+
+  var working = false
+
+  function checkIncomplete () {
+    if(working) return
+    if(0 === runningCount + pendingCount) return
+    working = true
+    jobs.emit('incomplete')
+  }
+
+  function checkComplete () {
+    var _working = (0 !== (runningCount + pendingCount))
+    if(_working === working) return
+
+    working = _working
+    jobs.emit(working ? 'incomplete' : 'complete')
+  }
+
+  jobs.isComplete = function () {
+    return !working
+  }
 
   var retry = []
 
@@ -20,8 +42,11 @@ module.exports = function (input, jobs, map, work) {
     if(!data.value) return
     var hash = shasum(data.value)
 
-    if(!running[hash])
+    if(!running[hash]) {
+      runningCount ++
       running[hash] = true
+      checkComplete()
+    }
     else return
 
     var done = false
@@ -38,11 +63,17 @@ module.exports = function (input, jobs, map, work) {
       
       jobs.del(data.key, function (err) {
         if(err) return retry.push(data)
+
+        runningCount --
         delete running[hash]
+
         if(pending[hash]) {
+          pendingCount --
           delete pending[hash]
           doJob(data)
         }
+
+        checkComplete()
       })
     })
   }
@@ -54,8 +85,11 @@ module.exports = function (input, jobs, map, work) {
 
     if(!running[hash])
       add({key: timestamp(), value: key, type: 'put', prefix: jobs})
-    else
+    else if(!pending[hash]) {
+      pendingCount ++
       pending[hash] = true
+      checkComplete()
+    }
   }
 
   input.pre(doHook)
