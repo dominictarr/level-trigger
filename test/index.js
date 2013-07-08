@@ -1,5 +1,6 @@
 var levelup = require('level-test')()
 var sublevel = require('level-sublevel')
+var assert = require('assert')
 
 var mac     = require('macgyver')().autoValidate()
 var Trigger = require('..')
@@ -36,6 +37,12 @@ var trigDb = Trigger(db, 'test-trigger', function (item) {
     db.emit('test:reduce', reduced)
   })
 
+var _done = false
+trigDb.on('complete', mac(function (k, n) {
+  _done = true
+  console.log('jobs finished')
+}).atLeast(1))
+
 //if we don't wait for the queue to drain,
 //then it will read puts from these twice.
 //TODO: add snapshot option for leveldb.
@@ -46,6 +53,15 @@ db.put('hello-C', JSON.stringify({thing: 3}))
 db.put('hello-D', JSON.stringify({thing: 6}))
 db.del('hello-C')
 
+var i = setInterval(function () {
+  assert.equal(typeof trigDb.isComplete(), 'boolean')
+  if(trigDb.isComplete())
+    clearInterval(i)
+}, 20)
+
 db.on('test:reduce', mac().times(5))
 
+process.on('exit', function () {
+  assert.equal(_done, true)
+})
 
