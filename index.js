@@ -12,7 +12,7 @@ module.exports = function (input, jobs, map, work) {
 
 
   if('string' === typeof jobs)
-    jobs = input.sublevel(jobs)
+    jobs = input.sublevel(jobs, {encoding: 'utf8'})
 
   var working = false
 
@@ -100,14 +100,14 @@ module.exports = function (input, jobs, map, work) {
 
   //process the whole db as a batch
   jobs.start = function () {
-    input.createReadStream()
+    input.createReadStream({valueEncoding: 'utf8'})
       .on('data', function (data) {
         doHook(data, doJob)
       })
     return jobs
   }
 
-  jobs.createReadStream().on('data', doJob)
+  jobs.createReadStream({valueEncoding:'utf8'}).on('data', doJob)
   jobs.post(doJob)
 
   return jobs
