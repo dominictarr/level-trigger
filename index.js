@@ -84,7 +84,11 @@ module.exports = function (input, jobs, map, work) {
     var hash = shasum(key)
 
     if(!running[hash])
-      add({key: timestamp(), value: key, type: 'put', prefix: jobs})
+      add({
+        key: timestamp(), value: key,
+        type: 'put', prefix: jobs,
+        valueEncoding: 'utf8', keyEncoding: 'utf8'
+      })
     else if(!pending[hash]) {
       pendingCount ++
       pending[hash] = true
