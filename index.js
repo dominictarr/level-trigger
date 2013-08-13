@@ -56,6 +56,7 @@ module.exports = function (input, jobs, map, work) {
       done = true
       if(err) {
         return setTimeout(function () {
+          delete running[hash]
           doJob(data)
         //hardcoded timeout WTF
         }, 50)
