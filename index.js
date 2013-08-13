@@ -60,7 +60,7 @@ module.exports = function (input, jobs, map, work) {
         //hardcoded timeout WTF
         }, 50)
       }
-      
+
       jobs.del(data.key, function (err) {
         if(err) return retry.push(data)
 
@@ -100,9 +100,14 @@ module.exports = function (input, jobs, map, work) {
 
   //process the whole db as a batch
   jobs.start = function () {
+    var hadData = false;
     input.createReadStream({valueEncoding: 'utf8'})
       .on('data', function (data) {
+        hadData = true
         doHook(data, doJob)
+      })
+      .on('end', function () {
+        if (! hadData && ! working) jobs.emit('complete')
       })
     return jobs
   }
