@@ -71,7 +71,6 @@ module.exports = function (input, jobs, map, work) {
         if(pending[hash]) {
           pendingCount --
           delete pending[hash]
-          doJob(data)
         }
 
         checkComplete()
