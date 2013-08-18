@@ -18,13 +18,13 @@ var trigDb = Trigger(db, 'test-trigger', function (item) {
     }))
     var obj = item.value ? JSON.parse(item.value) : null
     return JSON.stringify({
-      key: ''+item.key, 
+      key: ''+item.key,
       type: item.type
     })
   },
   function (value, done) {
     value = JSON.parse(value)
-    
+
     function reduce (acc, n, put) {
       return (acc || 0) + (put ? 1 : -1)
     }
@@ -59,7 +59,7 @@ var i = setInterval(function () {
     clearInterval(i)
 }, 20)
 
-db.on('test:reduce', mac().times(5))
+db.on('test:reduce', mac().times(4))
 
 process.on('exit', function () {
   assert.equal(_done, true)
