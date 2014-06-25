@@ -1,4 +1,3 @@
-var dir = 'level-trigger-test'
 var level = require('level-test')()
 var sublevel = require('level-sublevel')
 
@@ -7,7 +6,7 @@ var test    = require('tape')
 
 test('start a trigger manually', function (t) {
 
-  var db = sublevel(level(dir))
+  var db = sublevel(level('level-trigger-test'))
   var sum = 0, _sum = 0
 
   db.batch('abcdef'.split('').map(function (e) {
