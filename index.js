@@ -1,3 +1,4 @@
+'use strict';
 var shasum = require('shasum')
 var timestamp = require('monotonic-timestamp')
 //if a job starts, and another is queued before the current job ends,
@@ -55,6 +56,7 @@ module.exports = function (input, jobs, map, work) {
       if(done) return
       done = true
       if(err) {
+        console.error(err.stack)
         return setTimeout(function () {
           delete running[hash]
           doJob(data)
