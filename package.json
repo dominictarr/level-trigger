@@ -14,8 +14,8 @@
     "macgyver": "~1.10.1",
     "rimraf": "~2.0.2",
     "level-sublevel": "~4.8",
-    "tape": "~1.0.2",
-    "level-test": "~1.1.1"
+    "tape": "~2.13.3",
+    "level-test": "~1.6.3"
   },
   "scripts": {
     "test": "set -e; for t in test/*.js; do node $t; done"
