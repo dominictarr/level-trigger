@@ -46,6 +46,7 @@ module.exports = function (input, jobs, map, work) {
       runningCount --
       delete running[hash]
 
+      jobs.emit('done', data);
       if(pending[hash]) {
         pendingCount --
         delete pending[hash]
