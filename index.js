@@ -36,7 +36,22 @@ module.exports = function (input, jobs, map, work) {
     return !working
   }
 
-  var retry = []
+  function deleteJob(data, hash) {
+    jobs.del(data.key, function (err) {
+      if(err) return deleteJob(data, hash)
+
+      runningCount --
+      delete running[hash]
+
+      if(pending[hash]) {
+        pendingCount --
+        delete pending[hash]
+        doJob(data)
+      }
+
+      checkComplete()
+    })
+  }
 
   function doJob (data) {
     //don't process deletes!
@@ -64,20 +79,8 @@ module.exports = function (input, jobs, map, work) {
         }, 50)
       }
 
-      jobs.del(data.key, function (err) {
-        if(err) return retry.push(data)
+      deleteJob(data, hash)
 
-        runningCount --
-        delete running[hash]
-
-        if(pending[hash]) {
-          pendingCount --
-          delete pending[hash]
-          doJob(data)
-        }
-
-        checkComplete()
-      })
     })
   }
 
