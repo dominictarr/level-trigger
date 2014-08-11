@@ -38,7 +38,10 @@ module.exports = function (input, jobs, map, work) {
 
   function deleteJob(data, hash) {
     jobs.del(data.key, function (err) {
-      if(err) return deleteJob(data, hash)
+      if(err) return setTimeout(function () {
+        deleteJob(data, hash)
+        // atleast we are consistent with this?
+      }, 50);
 
       runningCount --
       delete running[hash]
