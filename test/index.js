@@ -47,19 +47,34 @@ trigDb.on('complete', mac(function (k, n) {
 //then it will read puts from these twice.
 //TODO: add snapshot option for leveldb.
 
-db.put('hello-A', JSON.stringify({thing: 1}))
-db.put('hello-B', JSON.stringify({thing: 2}))
-db.put('hello-C', JSON.stringify({thing: 3}))
-db.put('hello-D', JSON.stringify({thing: 6}))
-db.del('hello-C')
+//THIS IS UGLY AND BAD.
 
-var i = setInterval(function () {
-  assert.equal(typeof trigDb.isComplete(), 'boolean')
-  if(trigDb.isComplete())
-    clearInterval(i)
-}, 20)
+// TESTS SHOULD NOT HAVE A SETTIMEOUT IN THEM.
+// However, this is a racecondition that only breaks
+// during the tests. basically, the prehook triggers
+// for the puts that are created before the database
+// is opened, but also the readstream that recovers
+// incomplete jobs processes some things.
+// this needs to be fixed in either levelup or level-sublevel.
+
+setTimeout(function () {
+
+  db.put('hello-A', JSON.stringify({thing: 1}))
+  db.put('hello-B', JSON.stringify({thing: 2}))
+  db.put('hello-C', JSON.stringify({thing: 3}))
+  db.put('hello-D', JSON.stringify({thing: 6}))
+  db.del('hello-C')
+
+  var i = setInterval(function () {
+    assert.equal(typeof trigDb.isComplete(), 'boolean')
+    if(trigDb.isComplete())
+      clearInterval(i)
+  }, 20)
+
+}, 200)
 
 db.on('test:reduce', mac().times(5))
+
 
 process.on('exit', function () {
   assert.equal(_done, true)
