@@ -10,7 +10,7 @@ it will be rerun the next time it's started, for consistency!
 
 ## Stability
 
-Unstable: Expect patches and features, possible api changes.
+Stable: Expect bugfixes.
 
 # Example
 
