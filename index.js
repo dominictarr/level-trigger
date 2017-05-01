@@ -89,7 +89,8 @@ module.exports = function (input, jobs, map, work) {
 
   function doHook (ch, add) {
     var key = map(ch)
-    if(key == null) return
+    if(key == null || ! ch.value) return
+
     var hash = shasum(key)
 
     if(!running[hash])
